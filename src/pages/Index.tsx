@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
+import { Share2 } from "lucide-react";
 
 interface Transaction {
   id: number;
@@ -38,6 +39,23 @@ const Index = () => {
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<"已结款" | "未结款">("未结款");
   const { toast } = useToast();
+
+  const handleShare = () => {
+    const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sm积分记录.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "导出成功",
+      description: "数据已保存到文件",
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +108,13 @@ const Index = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-      <h1 className="text-3xl font-bold text-center mb-8">SM积分记账系统</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">SM积分记账系统</h1>
+        <Button onClick={handleShare} variant="outline" className="flex items-center gap-2">
+          <Share2 className="h-4 w-4" />
+          导出数据
+        </Button>
+      </div>
 
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <form onSubmit={handleSubmit} className="space-y-4">
