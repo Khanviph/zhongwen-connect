@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,14 +31,26 @@ interface Transaction {
   date: string;
 }
 
+const STORAGE_KEY = "sm_transactions";
+
 const Index = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    // 从 localStorage 读取初始数据
+    const savedTransactions = localStorage.getItem(STORAGE_KEY);
+    return savedTransactions ? JSON.parse(savedTransactions) : [];
+  });
   const [account, setAccount] = useState("");
   const [points, setPoints] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<"已结款" | "未结款">("未结款");
   const { toast } = useToast();
+
+  // 当 transactions 改变时，保存到 localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    console.log("Saving transactions to localStorage:", transactions);
+  }, [transactions]);
 
   const handleShare = () => {
     const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'text/plain' });
