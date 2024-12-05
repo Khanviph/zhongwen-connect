@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/lib/supabase";
 import LoginForm from "@/components/LoginForm";
 import TransactionForm from "@/components/TransactionForm";
 import TransactionList from "@/components/TransactionList";
+import { fetchTransactions } from "@/lib/api";
 
 interface Transaction {
   id: number;
@@ -24,14 +24,9 @@ const Index = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const { toast } = useToast();
 
-  const fetchTransactions = async () => {
+  const getTransactions = async () => {
     try {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      const data = await fetchTransactions();
       setTransactions(data || []);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -51,7 +46,7 @@ const Index = () => {
 
     checkAuth();
     if (isAuthenticated) {
-      fetchTransactions();
+      getTransactions();
     }
   }, [isAuthenticated]);
 
@@ -62,7 +57,7 @@ const Index = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sm积分记录.json";
+    a.download = "积分记录.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -83,7 +78,7 @@ const Index = () => {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">SM积分记账系统</h1>
+        <h1 className="text-3xl font-bold">积分记账系统</h1>
         <Button
           onClick={handleShare}
           variant="outline"
@@ -94,7 +89,7 @@ const Index = () => {
         </Button>
       </div>
 
-      <TransactionForm onSuccess={fetchTransactions} />
+      <TransactionForm onSuccess={getTransactions} />
 
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">总览</h2>
@@ -105,7 +100,7 @@ const Index = () => {
 
       <TransactionList
         transactions={transactions}
-        onUpdate={fetchTransactions}
+        onUpdate={getTransactions}
       />
     </div>
   );

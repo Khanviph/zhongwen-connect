@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/lib/supabase";
+import { createTransaction } from "@/lib/api";
 
 interface TransactionFormProps {
   onSuccess: () => void;
@@ -40,7 +40,7 @@ const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
     const priceNum = Number(unitPrice);
     
     try {
-      const { error } = await supabase.from("transactions").insert({
+      await createTransaction({
         type,
         account,
         points: pointsNum,
@@ -49,8 +49,6 @@ const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
         username,
         status,
       });
-
-      if (error) throw error;
 
       setType("sm积分");
       setAccount("");
