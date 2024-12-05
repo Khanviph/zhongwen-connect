@@ -20,7 +20,7 @@ app.add_middleware(
 
 # 数据模型
 class Transaction(BaseModel):
-    type: str
+    type: str  # 现在type字段是一个普通的字符串,可以接受任何积分类型
     account: str
     points: float
     unit_price: float
