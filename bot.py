@@ -80,6 +80,29 @@ async def add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         await update.message.reply_text(f"发生错误: {str(e)}")
 
+async def update_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """更新记录状态"""
+    try:
+        args = context.args
+        if len(args) < 2:
+            await update.message.reply_text("参数不足!\n格式: /update 记录ID 新状态")
+            return
+
+        record_id = int(args[0])
+        new_status = args[1]
+
+        result = supabase.table('transactions').update(
+            {"status": new_status}
+        ).eq("id", record_id).execute()
+
+        if result.data:
+            await update.message.reply_text(f"记录 {record_id} 状态已更新为: {new_status}")
+        else:
+            await update.message.reply_text("更新失败!")
+
+    except Exception as e:
+        await update.message.reply_text(f"发生错误: {str(e)}")
+
 async def ls(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """查看记录列表"""
     try:
@@ -151,4 +174,21 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         await update.message.reply_text(f"发生错误: {str(e)}")
 
-# ... keep existing code (update_status function and main function)
+def main() -> None:
+    """启动机器人"""
+    # 创建应用
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+
+    # 添加命令处理器
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help))
+    application.add_handler(CommandHandler("add", add))
+    application.add_handler(CommandHandler("update", update_status))
+    application.add_handler(CommandHandler("ls", ls))
+    application.add_handler(CommandHandler("search", search))
+
+    # 启动机器人
+    application.run_polling()
+
+if __name__ == '__main__':
+    main()
