@@ -16,6 +16,7 @@ interface TransactionFormProps {
 }
 
 const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
+  const [type, setType] = useState("sm积分");
   const [account, setAccount] = useState("");
   const [points, setPoints] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
@@ -26,7 +27,7 @@ const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!account || !points || !unitPrice || !username) {
+    if (!type || !account || !points || !unitPrice || !username) {
       toast({
         title: "错误",
         description: "请填写完整信息",
@@ -40,7 +41,7 @@ const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
     
     try {
       const { error } = await supabase.from("transactions").insert({
-        type: "sm积分",
+        type,
         account,
         points: pointsNum,
         unit_price: priceNum,
@@ -51,6 +52,7 @@ const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
 
       if (error) throw error;
 
+      setType("sm积分");
       setAccount("");
       setPoints("");
       setUnitPrice("");
@@ -77,6 +79,11 @@ const TransactionForm = ({ onSuccess }: TransactionFormProps) => {
     <div className="bg-white rounded-lg shadow p-6 mb-8">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Input
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            placeholder="积分类型"
+          />
           <Input
             value={account}
             onChange={(e) => setAccount(e.target.value)}
